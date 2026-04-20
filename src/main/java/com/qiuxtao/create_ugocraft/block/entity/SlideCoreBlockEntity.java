@@ -293,7 +293,7 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
             if (checkForObstruction(nextProgress)) {
                 if (warnSoundCooldown <= 0) {
                     level.playSound(null, this.worldPosition, com.qiuxtao.create_ugocraft.init.ModSounds.SLIDE_CORE_WARN.get(), net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
-                    warnSoundCooldown = 20; // 20 ticks = 1 秒间隔，可根据需要调整
+                    warnSoundCooldown = 40; // 40 ticks = 2 秒间隔
                 } else {
                     warnSoundCooldown--;
                 }
