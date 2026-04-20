@@ -65,4 +65,4 @@ rotationSpeedRPM = 16
 
 ## 许可证
 
-All Rights Reserved © qiuxtao
+MIT License
