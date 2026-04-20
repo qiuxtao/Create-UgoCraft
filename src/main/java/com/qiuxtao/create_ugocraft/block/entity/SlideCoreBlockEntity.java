@@ -187,6 +187,7 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
         }
 
         movedContraption = ControlledContraptionEntity.create(this.level, this, contraption);
+        movedContraption.setSilent(true);
 
         // 保存形状记忆，用于复原时拒绝新贴上来的阻挡物
         if (!isShapeSaved) {
@@ -679,6 +680,7 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
         // 拥抱更宽容的握手机制：允许客户端处于 IDLE 时也接纳实体，防止发包顺序导致的客户端实体不跟随
         if (this.movedContraption != contraption) {
             this.movedContraption = (ControlledContraptionEntity) contraption;
+            this.movedContraption.setSilent(true);
             setChanged();
         }
         return true;
@@ -687,6 +689,7 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
     @Override
     public void attach(ControlledContraptionEntity contraption) {
         this.movedContraption = contraption;
+        this.movedContraption.setSilent(true);
         setChanged();
         if (level != null && !level.isClientSide) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);

@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "create_ugocraft.refmap.json",
   "mixins": [
-    "DispenserBlockMixin"
+    "DispenserBlockMixin",
+    "AbstractContraptionEntityMixin"
   ],
   "client": [
   ],
