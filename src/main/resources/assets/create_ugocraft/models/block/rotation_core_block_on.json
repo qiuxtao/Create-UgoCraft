@@ -1,0 +1,16 @@
+{
+  "parent": "block/block",
+  "loader": "forge:obj",
+  "model": "create_ugocraft:models/block/mecha_rotate.obj",
+  "ambientocclusion": false,
+  "flip_v": true,
+  "visibility": {
+    "up": true,
+    "base": false,
+    "down": false
+  },
+  "textures": {
+    "0": "create_ugocraft:block/core_rotation_front_on",
+    "particle": "create_ugocraft:block/core_rotation_front_on"
+  }
+}

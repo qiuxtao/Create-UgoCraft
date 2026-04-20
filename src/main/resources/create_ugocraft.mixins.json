@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.qiuxtao.create_ugocraft.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "create_ugocraft.refmap.json",
+  "mixins": [
+    "DispenserBlockMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

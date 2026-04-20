@@ -1,0 +1,56 @@
+{
+  "variants": {
+    "facing=down,powered=false": {
+      "model": "create_ugocraft:block/rotation_core_block_off",
+      "x": 180
+    },
+    "facing=east,powered=false": {
+      "model": "create_ugocraft:block/rotation_core_block_off",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north,powered=false": {
+      "model": "create_ugocraft:block/rotation_core_block_off",
+      "x": 90
+    },
+    "facing=south,powered=false": {
+      "model": "create_ugocraft:block/rotation_core_block_off",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up,powered=false": {
+      "model": "create_ugocraft:block/rotation_core_block_off"
+    },
+    "facing=west,powered=false": {
+      "model": "create_ugocraft:block/rotation_core_block_off",
+      "x": 90,
+      "y": 270
+    },
+    "facing=down,powered=true": {
+      "model": "create_ugocraft:block/rotation_core_block_on",
+      "x": 180
+    },
+    "facing=east,powered=true": {
+      "model": "create_ugocraft:block/rotation_core_block_on",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north,powered=true": {
+      "model": "create_ugocraft:block/rotation_core_block_on",
+      "x": 90
+    },
+    "facing=south,powered=true": {
+      "model": "create_ugocraft:block/rotation_core_block_on",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up,powered=true": {
+      "model": "create_ugocraft:block/rotation_core_block_on"
+    },
+    "facing=west,powered=true": {
+      "model": "create_ugocraft:block/rotation_core_block_on",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

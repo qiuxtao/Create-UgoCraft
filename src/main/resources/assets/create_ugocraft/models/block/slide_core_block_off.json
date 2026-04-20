@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "front": "create_ugocraft:block/core_slide_front",
+    "front_e": "create_ugocraft:block/core_slide_front_e",
+    "back": "create_ugocraft:block/core_side_off",
+    "side": "create_ugocraft:block/core_side_off",
+    "particle": "#side"
+  },
+  "elements": [
+    {
+      "comment": "基础层",
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "north": { "texture": "#front", "cullface": "north" },
+        "south": { "texture": "#back",  "cullface": "south" },
+        "east":  { "texture": "#side",  "cullface": "east" },
+        "west":  { "texture": "#side",  "cullface": "west" },
+        "up":    { "texture": "#side",  "cullface": "up" },
+        "down":  { "texture": "#side",  "cullface": "down" }
+      }
+    },
+    {
+      "comment": "正面发光蒙版层（常亮）",
+      "from": [-0.01, -0.01, -0.01],
+      "to": [16.01, 16.01, 16.01],
+      "faces": {
+        "north": { "texture": "#front_e", "forge_data": { "block_light": 15 } }
+      }
+    }
+  ]
+}

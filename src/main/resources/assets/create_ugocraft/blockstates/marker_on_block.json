@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "create_ugocraft:block/marker_on_block" }
+  }
+}

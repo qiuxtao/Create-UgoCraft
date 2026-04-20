@@ -1,0 +1,6 @@
+{
+  "block.create_ugocraft.slide_core_block": "滑动方块",
+  "block.create_ugocraft.rotation_core_block": "转轴方块",
+  "block.create_ugocraft.marker_on_block": "标记器 (+)",
+  "block.create_ugocraft.marker_off_block": "标记器 (-)"
+}
