@@ -29,6 +29,7 @@ public class CreateUgoCraft {
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModEntities.register(modEventBus);
+        com.qiuxtao.create_ugocraft.init.ModSounds.register(modEventBus);
 
         // 注册速度配置
         com.qiuxtao.create_ugocraft.config.SpeedConfig.register();

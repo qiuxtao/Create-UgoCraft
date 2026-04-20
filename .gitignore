@@ -26,7 +26,11 @@ run-data
 repo
 
 # JVM crash logs
-hs_err_pid*.log
+*.log
+hs_err_pid*
+replay_pid*
+/bin/
+/build/
 
 # temporary/debug artifacts
 scratch/

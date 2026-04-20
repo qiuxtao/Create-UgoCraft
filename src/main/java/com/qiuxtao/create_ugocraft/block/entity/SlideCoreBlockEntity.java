@@ -45,6 +45,9 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
     // 形状记忆：防止读档后结构捕获紧挨着的障碍物
     private boolean isShapeSaved = false;
     private long[] originalShape = new long[0];
+    
+    // 不持久化的状态，用于判断是否要播放卡住音效
+    private transient boolean wasObstructed = false;
 
     public enum State {
         IDLE, SLIDING
@@ -66,6 +69,7 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
             // 中途反向：回到捕获位置（progress=0）
             currentDirection = -currentDirection;
             if (level != null && !level.isClientSide) {
+                level.playSound(null, this.worldPosition, com.qiuxtao.create_ugocraft.init.ModSounds.SLIDE_CORE_OPEN.get(), net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
                 level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
             }
             return;
@@ -79,6 +83,9 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
             if (success) {
                 currentDirection = 1.0;
                 LOGGER.info("[SLIDE_DEBUG] assembleAndStart success.");
+                if (level != null && !level.isClientSide) {
+                    level.playSound(null, this.worldPosition, com.qiuxtao.create_ugocraft.init.ModSounds.SLIDE_CORE_OPEN.get(), net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
+                }
             } else {
                 LOGGER.info("[SLIDE_DEBUG] assembleAndStart FAILED.");
             }
@@ -284,10 +291,16 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
 
             // 障碍物检测：如果前方有方块阻挡，停在原地悬停等待挖掘（符合 Ugocraft 逻辑）
             if (checkForObstruction(nextProgress)) {
+                if (!wasObstructed) {
+                    wasObstructed = true;
+                    level.playSound(null, this.worldPosition, com.qiuxtao.create_ugocraft.init.ModSounds.SLIDE_CORE_WARN.get(), net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
+                }
                 // 即使悬停，也要持续更新实体位置和碰撞，以防止客户端不同步或Culling缩小
                 updateEntityPosition();
                 collideWithPlayers(oldPos);
                 return;
+            } else {
+                wasObstructed = false;
             }
 
             currentProgress = nextProgress;
@@ -404,6 +417,9 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
         if (success) {
             currentDirection = 1.0;
             LOGGER.info("[SLIDE_DEBUG] Auto-align assembleAndStart SUCCESS.");
+            if (level != null && !level.isClientSide) {
+                level.playSound(null, this.worldPosition, com.qiuxtao.create_ugocraft.init.ModSounds.SLIDE_CORE_OPEN.get(), net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
+            }
         } else {
             LOGGER.info("[SLIDE_DEBUG] Auto-align assembleAndStart FAILED.");
         }

@@ -1,0 +1,14 @@
+{
+  "block.slide_core.open": {
+    "category": "block",
+    "sounds": [
+      "create_ugocraft:block/open"
+    ]
+  },
+  "block.slide_core.warn": {
+    "category": "block",
+    "sounds": [
+      "create_ugocraft:block/warn"
+    ]
+  }
+}
