@@ -46,8 +46,8 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
     private boolean isShapeSaved = false;
     private long[] originalShape = new long[0];
     
-    // 不持久化的状态，用于判断是否要播放卡住音效
-    private transient boolean wasObstructed = false;
+    // 不持久化的状态，用于判断卡住音效的播放冷却
+    private transient int warnSoundCooldown = 0;
 
     public enum State {
         IDLE, SLIDING
@@ -291,16 +291,18 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
 
             // 障碍物检测：如果前方有方块阻挡，停在原地悬停等待挖掘（符合 Ugocraft 逻辑）
             if (checkForObstruction(nextProgress)) {
-                if (!wasObstructed) {
-                    wasObstructed = true;
+                if (warnSoundCooldown <= 0) {
                     level.playSound(null, this.worldPosition, com.qiuxtao.create_ugocraft.init.ModSounds.SLIDE_CORE_WARN.get(), net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
+                    warnSoundCooldown = 20; // 20 ticks = 1 秒间隔，可根据需要调整
+                } else {
+                    warnSoundCooldown--;
                 }
                 // 即使悬停，也要持续更新实体位置和碰撞，以防止客户端不同步或Culling缩小
                 updateEntityPosition();
                 collideWithPlayers(oldPos);
                 return;
             } else {
-                wasObstructed = false;
+                warnSoundCooldown = 0;
             }
 
             currentProgress = nextProgress;
