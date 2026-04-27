@@ -1,10 +1,10 @@
 package com.qiuxtao.create_ugocraft.block;
 
+import com.mojang.serialization.MapCodec;
 import com.qiuxtao.create_ugocraft.block.entity.RotationCoreBlockEntity;
 import com.qiuxtao.create_ugocraft.init.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -22,6 +22,7 @@ import javax.annotation.Nullable;
 import net.minecraft.world.item.context.BlockPlaceContext;
 
 public class RotationCoreBlock extends BaseEntityBlock {
+    public static final MapCodec<RotationCoreBlock> CODEC = simpleCodec(RotationCoreBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
@@ -30,6 +31,11 @@ public class RotationCoreBlock extends BaseEntityBlock {
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(POWERED, false));
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
     }
 
     @Override
@@ -61,8 +67,8 @@ public class RotationCoreBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos,
-                                  Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+                                               Player player, BlockHitResult hit) {
         return InteractionResult.PASS;
     }
 

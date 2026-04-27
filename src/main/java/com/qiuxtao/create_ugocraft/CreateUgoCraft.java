@@ -1,51 +1,48 @@
 package com.qiuxtao.create_ugocraft;
 
 import com.mojang.logging.LogUtils;
-import com.qiuxtao.create_ugocraft.init.ModBlocks;
 import com.qiuxtao.create_ugocraft.init.ModBlockEntities;
+import com.qiuxtao.create_ugocraft.init.ModBlocks;
 import com.qiuxtao.create_ugocraft.init.ModEntities;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import com.qiuxtao.create_ugocraft.init.ModSounds;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.slf4j.Logger;
 
 @Mod(CreateUgoCraft.MODID)
 public class CreateUgoCraft {
     public static final String MODID = "create_ugocraft";
-    private static final Logger LOGGER = LogUtils.getLogger();
-    
-    // 全局阻断发射器状态拦截器，用于结构拆除释放阶段
     public static volatile boolean suppressDispenserActivation = false;
 
-    public CreateUgoCraft() {
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+    private static final Logger LOGGER = LogUtils.getLogger();
 
+    public CreateUgoCraft(IEventBus modEventBus, ModContainer modContainer) {
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModEntities.register(modEventBus);
-        com.qiuxtao.create_ugocraft.init.ModSounds.register(modEventBus);
+        ModSounds.register(modEventBus);
 
-        // 注册速度配置
-        com.qiuxtao.create_ugocraft.config.SpeedConfig.register();
+        com.qiuxtao.create_ugocraft.config.SpeedConfig.register(modContainer);
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::addCreative);
 
-        MinecraftForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.register(this);
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.REDSTONE_BLOCKS) {
-            event.accept(ModBlocks.SLIDE_CORE_BLOCK);
-            event.accept(ModBlocks.ROTATION_CORE_BLOCK);
-            event.accept(ModBlocks.MARKER_ON_BLOCK);
-            event.accept(ModBlocks.MARKER_OFF_BLOCK);
+            event.accept(ModBlocks.SLIDE_CORE_BLOCK.get());
+            event.accept(ModBlocks.ROTATION_CORE_BLOCK.get());
+            event.accept(ModBlocks.MARKER_ON_BLOCK.get());
+            event.accept(ModBlocks.MARKER_OFF_BLOCK.get());
         }
     }
 

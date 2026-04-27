@@ -45,6 +45,5 @@ commit.txt
 # decompilation artifacts
 cfr.jar
 decompiled/
-com/
 *_decompiled.java
 decompiled_*.java

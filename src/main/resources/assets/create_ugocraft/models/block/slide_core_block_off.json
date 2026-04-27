@@ -10,24 +10,22 @@
   },
   "elements": [
     {
-      "comment": "基础层",
       "from": [0, 0, 0],
       "to": [16, 16, 16],
       "faces": {
         "north": { "texture": "#front", "cullface": "north" },
-        "south": { "texture": "#back",  "cullface": "south" },
-        "east":  { "texture": "#side",  "cullface": "east" },
-        "west":  { "texture": "#side",  "cullface": "west" },
-        "up":    { "texture": "#side",  "cullface": "up" },
-        "down":  { "texture": "#side",  "cullface": "down" }
+        "south": { "texture": "#back", "cullface": "south" },
+        "east": { "texture": "#side", "cullface": "east" },
+        "west": { "texture": "#side", "cullface": "west" },
+        "up": { "texture": "#side", "cullface": "up" },
+        "down": { "texture": "#side", "cullface": "down" }
       }
     },
     {
-      "comment": "正面发光蒙版层（常亮）",
       "from": [-0.01, -0.01, -0.01],
       "to": [16.01, 16.01, 16.01],
       "faces": {
-        "north": { "texture": "#front_e", "forge_data": { "block_light": 15 } }
+        "north": { "uv": [0, 0, 16, 16], "texture": "#front_e", "neoforge_data": { "block_light": 15 } }
       }
     }
   ]

@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(DispenserBlock.class)
 public class DispenserBlockMixin {
 
-    @Inject(method = "neighborChanged", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "neighborChanged", at = @At("HEAD"), cancellable = true, remap = false)
     private void create_ugocraft$suppressNeighborUpdate(BlockState state, net.minecraft.world.level.Level level,
             BlockPos pos, net.minecraft.world.level.block.Block block, BlockPos fromPos, boolean isMoving,
             CallbackInfo ci) {
@@ -25,7 +25,7 @@ public class DispenserBlockMixin {
         }
     }
 
-    @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "tick", at = @At("HEAD"), cancellable = true, remap = false)
     private void create_ugocraft$suppressTick(BlockState state, ServerLevel level, BlockPos pos,
             RandomSource random, CallbackInfo ci) {
         if (com.qiuxtao.create_ugocraft.CreateUgoCraft.suppressDispenserActivation) {

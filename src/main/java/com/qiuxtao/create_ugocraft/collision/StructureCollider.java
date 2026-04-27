@@ -84,7 +84,7 @@ public class StructureCollider {
 					boolean isTemporal = timeOfImpact > 0 && timeOfImpact < 1;
 
 					if (!isTemporal) {
-						Vec3 separation = intersect.asSeparationVec(entity.getStepHeight());
+						Vec3 separation = intersect.asSeparationVec(entity.maxUpStep());
 						if (separation != null && !separation.equals(Vec3.ZERO)) {
 							collisionResponse = collisionResponse.add(separation);
 						}

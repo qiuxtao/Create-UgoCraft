@@ -606,8 +606,8 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         tag.putInt("State", state.ordinal());
         tag.putDouble("CurrentProgress", currentProgress);
         tag.putDouble("TargetDistance", targetDistance);
@@ -623,8 +623,8 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    protected void loadAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         if (tag.contains("State")) {
             this.state = State.values()[tag.getInt("State")];
         }
@@ -652,9 +652,9 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
+    public CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
         CompoundTag tag = new CompoundTag();
-        this.saveAdditional(tag);
+        this.saveAdditional(tag, registries);
         return tag;
     }
 

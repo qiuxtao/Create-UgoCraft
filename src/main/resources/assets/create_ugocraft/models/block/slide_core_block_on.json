@@ -11,29 +11,27 @@
   },
   "elements": [
     {
-      "comment": "基础层",
       "from": [0, 0, 0],
       "to": [16, 16, 16],
       "faces": {
         "north": { "texture": "#front", "cullface": "north" },
-        "south": { "texture": "#back",  "cullface": "south" },
-        "east":  { "texture": "#side",  "cullface": "east" },
-        "west":  { "texture": "#side",  "cullface": "west" },
-        "up":    { "texture": "#side",  "cullface": "up" },
-        "down":  { "texture": "#side",  "cullface": "down" }
+        "south": { "texture": "#back", "cullface": "south" },
+        "east": { "texture": "#side", "cullface": "east" },
+        "west": { "texture": "#side", "cullface": "west" },
+        "up": { "texture": "#side", "cullface": "up" },
+        "down": { "texture": "#side", "cullface": "down" }
       }
     },
     {
-      "comment": "全部发光蒙版层（激活时所有面发光）",
       "from": [-0.01, -0.01, -0.01],
       "to": [16.01, 16.01, 16.01],
       "faces": {
-        "north": { "texture": "#front_e", "forge_data": { "block_light": 15 } },
-        "south": { "texture": "#side_e",  "forge_data": { "block_light": 15 } },
-        "east":  { "texture": "#side_e",  "forge_data": { "block_light": 15 } },
-        "west":  { "texture": "#side_e",  "forge_data": { "block_light": 15 } },
-        "up":    { "texture": "#side_e",  "forge_data": { "block_light": 15 } },
-        "down":  { "texture": "#side_e",  "forge_data": { "block_light": 15 } }
+        "north": { "uv": [0, 0, 16, 16], "texture": "#front_e", "neoforge_data": { "block_light": 15 } },
+        "south": { "uv": [0, 0, 16, 16], "texture": "#side_e", "neoforge_data": { "block_light": 15 } },
+        "east": { "uv": [0, 0, 16, 16], "texture": "#side_e", "neoforge_data": { "block_light": 15 } },
+        "west": { "uv": [0, 0, 16, 16], "texture": "#side_e", "neoforge_data": { "block_light": 15 } },
+        "up": { "uv": [0, 0, 16, 16], "texture": "#side_e", "neoforge_data": { "block_light": 15 } },
+        "down": { "uv": [0, 0, 16, 16], "texture": "#side_e", "neoforge_data": { "block_light": 15 } }
       }
     }
   ]

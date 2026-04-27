@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(AbstractContraptionEntity.class)
 public abstract class AbstractContraptionEntityMixin {
 
-    @Shadow
+    @Shadow(remap = false)
     protected Contraption contraption;
 
     @Redirect(

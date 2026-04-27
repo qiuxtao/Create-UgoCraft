@@ -298,8 +298,8 @@ public class RotationCoreBlockEntity extends BlockEntity implements IControlCont
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         tag.putInt("State", state.ordinal());
         tag.putFloat("CurrentAngle", currentAngle);
         tag.putFloat("ReturnTargetAngle", returnTargetAngle);
@@ -307,8 +307,8 @@ public class RotationCoreBlockEntity extends BlockEntity implements IControlCont
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    protected void loadAdditional(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         if (tag.contains("State")) {
             this.state = State.values()[tag.getInt("State")];
         }
@@ -328,9 +328,9 @@ public class RotationCoreBlockEntity extends BlockEntity implements IControlCont
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
+    public CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
         CompoundTag tag = new CompoundTag();
-        this.saveAdditional(tag);
+        this.saveAdditional(tag, registries);
         return tag;
     }
 

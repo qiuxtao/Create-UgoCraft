@@ -1,6 +1,6 @@
 {
   "parent": "block/block",
-  "loader": "forge:obj",
+  "loader": "neoforge:obj",
   "model": "create_ugocraft:models/block/mecha_rotate.obj",
   "ambientocclusion": false,
   "flip_v": true,
@@ -9,6 +9,7 @@
     "base": false,
     "down": false
   },
+  "gui_light": "front",
   "textures": {
     "0": "create_ugocraft:block/core_rotation_front_on",
     "particle": "create_ugocraft:block/core_rotation_front_on"

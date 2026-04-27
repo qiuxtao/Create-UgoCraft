@@ -1,10 +1,10 @@
 package com.qiuxtao.create_ugocraft.block;
 
+import com.mojang.serialization.MapCodec;
 import com.qiuxtao.create_ugocraft.block.entity.SlideCoreBlockEntity;
 import com.qiuxtao.create_ugocraft.init.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -18,22 +18,22 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.core.Direction;
 import javax.annotation.Nullable;
 import net.minecraft.world.item.context.BlockPlaceContext;
 
 /**
  * Slide Core Block (滑动核心方块)
  * 
- * 原版 UgoCraft 中的 Umr_at_Tawil 方块的 1.20.1 重制版。
+ * 
  * 
  * 核心机制：
  * - FACING 方向 = 结构的滑动方向（出口面）
  * - 红石信号从任意非 FACING 面输入来激活
  * - 激活后，从 FACING 方向的前方搜索连通方块组成结构
- * - 结构沿 FACING 方向滑动，直到碰到障碍物或标记块标定的终点
+ * - 激活后，从 FACING 方向的前方搜索连通方块组成结构
  */
 public class SlideCoreBlock extends BaseEntityBlock {
+    public static final MapCodec<SlideCoreBlock> CODEC = simpleCodec(SlideCoreBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
@@ -42,6 +42,11 @@ public class SlideCoreBlock extends BaseEntityBlock {
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(POWERED, false));
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
     }
 
     @Override
@@ -74,8 +79,8 @@ public class SlideCoreBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos,
-                                  Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+                                               Player player, BlockHitResult hit) {
         // 右键不做任何事情，必须通过红石触发
         return InteractionResult.PASS;
     }
@@ -102,7 +107,7 @@ public class SlideCoreBlock extends BaseEntityBlock {
     }
 
     /**
-     * 检测除了 FACING 方向以外的其他5面是否接收到红石信号。
+            if (dir == facing) continue; // 跳过出口面
      * 这样可以确保 FACING 面前方放置的红石不会误触发。
      */
     private boolean hasRedstoneSignalExceptFacing(Level level, BlockPos pos, Direction facing) {

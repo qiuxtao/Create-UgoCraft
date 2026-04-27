@@ -5,22 +5,41 @@ import com.google.gson.GsonBuilder;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.BasePressurePlateBlock;
+import net.minecraft.world.level.block.BaseRailBlock;
+import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.CarpetBlock;
+import net.minecraft.world.level.block.DiodeBlock;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
+import net.minecraft.world.level.block.FlowerBlock;
+import net.minecraft.world.level.block.LadderBlock;
+import net.minecraft.world.level.block.LeverBlock;
+import net.minecraft.world.level.block.RedStoneWireBlock;
+import net.minecraft.world.level.block.SaplingBlock;
+import net.minecraft.world.level.block.StandingSignBlock;
+import net.minecraft.world.level.block.TallGrassBlock;
+import net.minecraft.world.level.block.TorchBlock;
+import net.minecraft.world.level.block.TripWireHookBlock;
+import net.minecraft.world.level.block.WallSignBlock;
+import net.minecraft.world.level.block.WallTorchBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.fml.loading.FMLPaths;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Arrays;
 
 public class BlockConfig {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -31,30 +50,29 @@ public class BlockConfig {
 
     public static class ConfigData {
         public Set<String> blacklist = new HashSet<>(Arrays.asList(
-            "minecraft:bedrock",
-            "minecraft:obsidian",
-            "minecraft:crying_obsidian",
-            "minecraft:end_portal_frame",
-            "minecraft:command_block",
-            "minecraft:chain_command_block",
-            "minecraft:repeating_command_block",
-            "minecraft:barrier",
-            "minecraft:structure_block",
-            "minecraft:jigsaw",
-            // Natural generation blocks commonly excluded to prevent large-scale gathering
-            "minecraft:dirt",
-            "minecraft:grass_block",
-            "minecraft:podzol",
-            "minecraft:mycelium",
-            "minecraft:sand",
-            "minecraft:red_sand",
-            "minecraft:gravel",
-            "minecraft:stone",
-            "minecraft:diorite",
-            "minecraft:andesite",
-            "minecraft:granite",
-            "minecraft:tuff",
-            "minecraft:deepslate"
+                "minecraft:bedrock",
+                "minecraft:obsidian",
+                "minecraft:crying_obsidian",
+                "minecraft:end_portal_frame",
+                "minecraft:command_block",
+                "minecraft:chain_command_block",
+                "minecraft:repeating_command_block",
+                "minecraft:barrier",
+                "minecraft:structure_block",
+                "minecraft:jigsaw",
+                "minecraft:dirt",
+                "minecraft:grass_block",
+                "minecraft:podzol",
+                "minecraft:mycelium",
+                "minecraft:sand",
+                "minecraft:red_sand",
+                "minecraft:gravel",
+                "minecraft:stone",
+                "minecraft:diorite",
+                "minecraft:andesite",
+                "minecraft:granite",
+                "minecraft:tuff",
+                "minecraft:deepslate"
         ));
     }
 
@@ -82,56 +100,39 @@ public class BlockConfig {
 
     public static boolean canMove(Level level, BlockState state, BlockPos pos) {
         if (state.isAir()) return false;
-        
-        // 1. Hardcoded limit: bedrock, etc.
         if (state.getDestroySpeed(level, pos) < 0) return false;
 
-        ResourceLocation blockId = ForgeRegistries.BLOCKS.getKey(state.getBlock());
+        ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock());
         if (blockId == null) return true;
-        
-        String idStr = blockId.toString();
 
-        // 3. Blacklist
-        if (configData.blacklist.contains(idStr)) {
-            return false;
-        }
-
-        return true;
+        return !configData.blacklist.contains(blockId.toString());
     }
 
-    /**
-     * 判断一个方块是否为"脆弱依赖型方块"（如火把、拉杆、红石）。
-     */
     public static boolean isFragileAttachedBlock(BlockState state) {
         Block block = state.getBlock();
         return block instanceof TorchBlock
-            || block instanceof FaceAttachedHorizontalDirectionalBlock
-            || block instanceof LadderBlock
-            || block instanceof TripWireHookBlock
-            || block instanceof WallSignBlock
-            || block instanceof BasePressurePlateBlock
-            || block instanceof RedStoneWireBlock
-            || block instanceof DiodeBlock
-            || block instanceof DoorBlock
-            || block instanceof BedBlock
-            || block instanceof BaseRailBlock
-            || block instanceof FlowerBlock
-            || block instanceof SaplingBlock
-            || block instanceof TallGrassBlock
-            || block instanceof CarpetBlock
-            || block instanceof StandingSignBlock
-            || block instanceof ButtonBlock
-            || block instanceof LeverBlock;
+                || block instanceof FaceAttachedHorizontalDirectionalBlock
+                || block instanceof LadderBlock
+                || block instanceof TripWireHookBlock
+                || block instanceof WallSignBlock
+                || block instanceof BasePressurePlateBlock
+                || block instanceof RedStoneWireBlock
+                || block instanceof DiodeBlock
+                || block instanceof DoorBlock
+                || block instanceof BedBlock
+                || block instanceof BaseRailBlock
+                || block instanceof FlowerBlock
+                || block instanceof SaplingBlock
+                || block instanceof TallGrassBlock
+                || block instanceof CarpetBlock
+                || block instanceof StandingSignBlock
+                || block instanceof ButtonBlock
+                || block instanceof LeverBlock;
     }
 
-    /**
-     * 判断脆弱方块（neighborState）是否附着在 anchorDir 方向的面（即它依靠 anchorDir 面存活）。
-     * anchorDir 指的是该方块"指向其支撑方块"的方向。
-     */
     public static boolean isAnchoredTo(BlockState neighborState, Direction anchorDir) {
         Block block = neighborState.getBlock();
 
-        // 1. 火把类
         if (block instanceof TorchBlock) {
             if (block instanceof WallTorchBlock) {
                 return neighborState.getValue(BlockStateProperties.HORIZONTAL_FACING).getOpposite() == anchorDir;
@@ -139,7 +140,6 @@ public class BlockConfig {
             return anchorDir == Direction.DOWN;
         }
 
-        // 2. 贴面方块（按钮、拉杆、砂轮等）
         if (block instanceof FaceAttachedHorizontalDirectionalBlock) {
             AttachFace face = neighborState.getValue(BlockStateProperties.ATTACH_FACE);
             Direction facing = neighborState.getValue(BlockStateProperties.HORIZONTAL_FACING);
@@ -148,12 +148,10 @@ public class BlockConfig {
             if (face == AttachFace.WALL) return anchorDir == facing.getOpposite();
         }
 
-        // 3. 墙面附着方块（梯子、绊线钩、墙牌）
         if (block instanceof LadderBlock || block instanceof TripWireHookBlock || block instanceof WallSignBlock) {
             return neighborState.getValue(BlockStateProperties.HORIZONTAL_FACING).getOpposite() == anchorDir;
         }
 
-        // 4. 其余所有地面方块（红石粉、压力板、门、铁轨、花草等地表物）
         return anchorDir == Direction.DOWN;
     }
 }
