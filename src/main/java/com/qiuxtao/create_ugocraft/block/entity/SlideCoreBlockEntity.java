@@ -38,6 +38,7 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
     // 动态从配置获取速度
     private BlockPos startOffsetBaseline;
     private double currentDirection = 1.0;
+    private transient int settleCooldown = 0;
     private int alignCheckCooldown = 0;
     private static final int ALIGN_CHECK_INTERVAL = 10; // 每10Tick检测一次自动对齐
     private transient int recoveryTicks = 0; // 读档恢复计时器（不持久化）
@@ -158,6 +159,8 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
 
         this.slideAxis = computedSlideAxis;
         this.targetDistance = totalDistance;
+        this.currentProgress = 0.0;
+        this.settleCooldown = 0;
 
         LOGGER.info("[SLIDE_DEBUG] computedSlideAxis: {}, totalDistance: {}", computedSlideAxis, totalDistance);
 
@@ -270,6 +273,13 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
 
         // 自动对齐检测：当空闲时周期性检查结构是否需要对齐
         if (state == State.IDLE && !level.isClientSide) {
+            if (com.qiuxtao.create_ugocraft.CreateUgoCraft.suppressDispenserActivation) {
+                return;
+            }
+            if (settleCooldown > 0) {
+                settleCooldown--;
+                return;
+            }
             if (alignCheckCooldown <= 0) {
                 alignCheckCooldown = ALIGN_CHECK_INTERVAL;
                 tryAutoAlign();
@@ -333,6 +343,8 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
      * 根据当前红石状态自动开始位移。
      */
     private void tryAutoAlign() {
+        if (com.qiuxtao.create_ugocraft.CreateUgoCraft.suppressDispenserActivation) return;
+
         BlockState coreState = getBlockState();
         if (!coreState.hasProperty(BlockStateProperties.FACING)) return;
 
@@ -512,6 +524,11 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
         this.state = State.IDLE;
         this.isShapeSaved = false; // 用户可以给结构添加新的方块了
         this.currentProgress = 0;
+        this.currentDirection = 1.0;
+        this.targetDistance = 0;
+        this.slideAxis = null;
+        this.settleCooldown = 6;
+        this.alignCheckCooldown = ALIGN_CHECK_INTERVAL;
         setChanged();
         if (level != null && !level.isClientSide) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
