@@ -100,34 +100,16 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
         Map<BlockPos, BlockState> structure = gatherStructure(gatherStart);
         if (structure.isEmpty()) return false;
 
-        // 查找所有标记，选择离 coreConnection 最近的各一个
-        // 避免多标记时来回震荡
-        BlockPos markerOnPos = null;
-        BlockPos markerOffPos = null;
-        double nearestOnDist = Double.MAX_VALUE;
-        double nearestOffDist = Double.MAX_VALUE;
-
-        for (Map.Entry<BlockPos, BlockState> entry : structure.entrySet()) {
-            if (entry.getValue().is(ModBlocks.MARKER_ON_BLOCK.get())) {
-                double dist = entry.getKey().distSqr(baseConnection);
-                if (dist < nearestOnDist) {
-                    nearestOnDist = dist;
-                    markerOnPos = entry.getKey();
-                }
-            } else if (entry.getValue().is(ModBlocks.MARKER_OFF_BLOCK.get())) {
-                double dist = entry.getKey().distSqr(baseConnection);
-                if (dist < nearestOffDist) {
-                    nearestOffDist = dist;
-                    markerOffPos = entry.getKey();
-                }
-            }
-        }
-
-        if (markerOnPos == null || markerOffPos == null) return false;
-
         // ===== 计算真实偏移，以修正标志坐标 =====
         // 当因抛锚或意外崩溃后重启时，结构在世界里可能是整体偏移的
         BlockPos offsetVec = gatherStart.subtract(baseConnection);
+        MarkerPair markers = findAlignedMarkerPair(structure, baseConnection, gatherStart);
+        if (markers == null) {
+            LOGGER.info("[SLIDE_DEBUG] assembleAndStart failed: no aligned ON/OFF marker pair.");
+            return false;
+        }
+        BlockPos markerOnPos = markers.onPos;
+        BlockPos markerOffPos = markers.offPos;
 
         // ===== 计算滑动轴和距离 =====
         // 目标：将对应标记移动到 baseConnection 位置
@@ -371,11 +353,12 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
         BlockPos gatherStart = baseConnection;
 
         Map<BlockPos, BlockState> structure = gatherStructure(baseConnection);
+        MarkerPair markers = findAlignedMarkerPair(structure, baseConnection, gatherStart);
         
         // 如果 baseConnection 找不到结构，说明结构可能在偏移位置（实体恢复失败后被放到了中途）。
         // 此时沿 slideAxis 逐格扫描，尝试定位远处的结构。
         // 注意：只有 baseConnection 为空时才扫描，防止斜对角抓取 bug！
-        if ((structure.isEmpty() || !hasMarkers(structure)) && slideAxis != null && targetDistance > 0) {
+        if ((structure.isEmpty() || markers == null) && slideAxis != null && targetDistance > 0) {
             int maxScan = (int) Math.ceil(targetDistance);
             for (int scan = 1; scan <= maxScan; scan++) {
                 BlockPos scanPos = baseConnection.offset(
@@ -384,39 +367,23 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
                         slideAxis.getStepZ() * scan
                 );
                 Map<BlockPos, BlockState> scanStructure = gatherStructure(scanPos);
-                if (hasMarkers(scanStructure)) {
+                MarkerPair scanMarkers = findAlignedMarkerPair(scanStructure, baseConnection, scanPos);
+                if (scanMarkers != null) {
                     structure = scanStructure;
                     gatherStart = scanPos;
+                    markers = scanMarkers;
                     LOGGER.info("[SLIDE_DEBUG] tryAutoAlign: found structure at offset={} along slideAxis", scan);
                     break;
                 }
             }
         }
         
-        if (structure.isEmpty() || !hasMarkers(structure)) {
+        if (structure.isEmpty() || markers == null) {
             return;
         }
 
-        BlockPos markerOnPos = null;
-        BlockPos markerOffPos = null;
-        double nearestOnDist = Double.MAX_VALUE;
-        double nearestOffDist = Double.MAX_VALUE;
-        for (Map.Entry<BlockPos, BlockState> entry : structure.entrySet()) {
-            if (entry.getValue().is(ModBlocks.MARKER_ON_BLOCK.get())) {
-                double dist = entry.getKey().distSqr(gatherStart);
-                if (dist < nearestOnDist) {
-                    nearestOnDist = dist;
-                    markerOnPos = entry.getKey();
-                }
-            } else if (entry.getValue().is(ModBlocks.MARKER_OFF_BLOCK.get())) {
-                double dist = entry.getKey().distSqr(gatherStart);
-                if (dist < nearestOffDist) {
-                    nearestOffDist = dist;
-                    markerOffPos = entry.getKey();
-                }
-            }
-        }
-        if (markerOnPos == null || markerOffPos == null) return;
+        BlockPos markerOnPos = markers.onPos;
+        BlockPos markerOffPos = markers.offPos;
 
         // 检查目标标记是否已在 Core 连接点（已对齐则无需移动）
         BlockPos targetMarkerPos = powered ? markerOnPos : markerOffPos;
@@ -493,14 +460,74 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
         StructureCollider.collideEntities(movedContraption, blocks, newPos, new Matrix3d().asIdentity(), motion);
     }
 
-    private boolean hasMarkers(Map<BlockPos, BlockState> structure) {
-        boolean hasOn = false;
-        boolean hasOff = false;
-        for (BlockState state : structure.values()) {
-            if (state.is(ModBlocks.MARKER_ON_BLOCK.get())) hasOn = true;
-            if (state.is(ModBlocks.MARKER_OFF_BLOCK.get())) hasOff = true;
+    @Nullable
+    private MarkerPair findAlignedMarkerPair(Map<BlockPos, BlockState> structure, BlockPos baseConnection, BlockPos gatherStart) {
+        BlockPos offsetVec = gatherStart.subtract(baseConnection);
+        List<BlockPos> onMarkers = new ArrayList<>();
+        List<BlockPos> offMarkers = new ArrayList<>();
+
+        for (Map.Entry<BlockPos, BlockState> entry : structure.entrySet()) {
+            if (entry.getValue().is(ModBlocks.MARKER_ON_BLOCK.get())) {
+                onMarkers.add(entry.getKey());
+            } else if (entry.getValue().is(ModBlocks.MARKER_OFF_BLOCK.get())) {
+                offMarkers.add(entry.getKey());
+            }
         }
-        return hasOn && hasOff;
+
+        MarkerPair best = null;
+        double bestScore = Double.MAX_VALUE;
+        for (BlockPos onPos : onMarkers) {
+            for (BlockPos offPos : offMarkers) {
+                BlockPos originalOn = onPos.subtract(offsetVec);
+                BlockPos originalOff = offPos.subtract(offsetVec);
+                Direction.Axis axis = commonLineAxis(baseConnection, originalOn, originalOff);
+                if (axis == null) continue;
+
+                double score = originalOn.distSqr(baseConnection) + originalOff.distSqr(baseConnection);
+                if (score < bestScore) {
+                    bestScore = score;
+                    best = new MarkerPair(onPos, offPos);
+                }
+            }
+        }
+        return best;
+    }
+
+    @Nullable
+    private Direction.Axis commonLineAxis(BlockPos anchor, BlockPos a, BlockPos b) {
+        Direction.Axis axisA = axisFrom(anchor, a);
+        Direction.Axis axisB = axisFrom(anchor, b);
+        boolean aAtAnchor = a.equals(anchor);
+        boolean bAtAnchor = b.equals(anchor);
+
+        if (axisA == null && !aAtAnchor) return null;
+        if (axisB == null && !bAtAnchor) return null;
+        if (aAtAnchor && bAtAnchor) return null;
+        if (aAtAnchor) return axisB;
+        if (bAtAnchor) return axisA;
+        return axisA == axisB ? axisA : null;
+    }
+
+    @Nullable
+    private Direction.Axis axisFrom(BlockPos anchor, BlockPos pos) {
+        int dx = pos.getX() - anchor.getX();
+        int dy = pos.getY() - anchor.getY();
+        int dz = pos.getZ() - anchor.getZ();
+        int axes = (dx != 0 ? 1 : 0) + (dy != 0 ? 1 : 0) + (dz != 0 ? 1 : 0);
+        if (axes != 1) return null;
+        if (dx != 0) return Direction.Axis.X;
+        if (dy != 0) return Direction.Axis.Y;
+        return Direction.Axis.Z;
+    }
+
+    private static final class MarkerPair {
+        private final BlockPos onPos;
+        private final BlockPos offPos;
+
+        private MarkerPair(BlockPos onPos, BlockPos offPos) {
+            this.onPos = onPos;
+            this.offPos = offPos;
+        }
     }
 
     private void disassemble() {
