@@ -1,6 +1,6 @@
 # Create-UgoCraft
 
-一个基于 [Create (机械动力)](https://github.com/Creators-of-Create/Create) 的 Minecraft 结构移动附属模组，适用于 **Minecraft 1.20.1 Forge**。
+一个基于 [Create (机械动力)](https://github.com/Creators-of-Create/Create) 的 Minecraft 结构移动附属模组，适用于 **Forge (1.20.1)** 和 **NeoForge (1.21.1)**。
 
 ## 简介
 
@@ -49,9 +49,13 @@ rotationSpeedRPM = 16
 
 配置哪些方块不会被结构捕获（如基岩、泥土等）。
 
-## 依赖
+## 依赖与支持版本
 
-- **Minecraft** 1.20.1
+### Minecraft 1.21.1 (NeoForge)
+- **NeoForge** 21.1.228+
+- **Create** 6.0.10-280+ (NeoForge 版本)
+
+### Minecraft 1.20.1 (Forge)
 - **Forge** 47.1.3+
 - **Create** 0.5.1f+（Forge 版本）
 
