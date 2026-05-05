@@ -86,6 +86,17 @@ public class SlideCoreBlock extends BaseEntityBlock {
     }
 
     @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        if (!state.is(newState.getBlock())) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof SlideCoreBlockEntity core) {
+                core.disassembleForBlockRemoval();
+            }
+        }
+        super.onRemove(state, level, pos, newState, movedByPiston);
+    }
+
+    @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos,
                                  Block block, BlockPos fromPos, boolean isMoving) {
         if (!level.isClientSide) {
