@@ -103,7 +103,7 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
         // ===== 计算真实偏移，以修正标志坐标 =====
         // 当因抛锚或意外崩溃后重启时，结构在世界里可能是整体偏移的
         BlockPos offsetVec = gatherStart.subtract(baseConnection);
-        MarkerPair markers = findAlignedMarkerPair(structure, baseConnection, gatherStart);
+        MarkerPair markers = findAlignedMarkerPair(structure, baseConnection, gatherStart, facing.getAxis());
         if (markers == null) {
             LOGGER.info("[SLIDE_DEBUG] assembleAndStart failed: no aligned ON/OFF marker pair.");
             return false;
@@ -241,8 +241,7 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
                 state = State.IDLE;
                 currentProgress = 0;
                 currentDirection = 1.0;
-                isShapeSaved = false;
-                LOGGER.info("[SLIDE_DEBUG] Entity recovery timeout (40 ticks). Full reset to IDLE.");
+                LOGGER.info("[SLIDE_DEBUG] Entity recovery timeout (40 ticks). Reset to IDLE while keeping saved shape.");
                 recoveryTicks = 0;
                 setChanged();
                 level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
@@ -353,7 +352,7 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
         BlockPos gatherStart = baseConnection;
 
         Map<BlockPos, BlockState> structure = gatherStructure(baseConnection);
-        MarkerPair markers = findAlignedMarkerPair(structure, baseConnection, gatherStart);
+        MarkerPair markers = findAlignedMarkerPair(structure, baseConnection, gatherStart, facing.getAxis());
         
         // 如果 baseConnection 找不到结构，说明结构可能在偏移位置（实体恢复失败后被放到了中途）。
         // 此时沿 slideAxis 逐格扫描，尝试定位远处的结构。
@@ -367,7 +366,7 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
                         slideAxis.getStepZ() * scan
                 );
                 Map<BlockPos, BlockState> scanStructure = gatherStructure(scanPos);
-                MarkerPair scanMarkers = findAlignedMarkerPair(scanStructure, baseConnection, scanPos);
+                MarkerPair scanMarkers = findAlignedMarkerPair(scanStructure, baseConnection, scanPos, facing.getAxis());
                 if (scanMarkers != null) {
                     structure = scanStructure;
                     gatherStart = scanPos;
@@ -461,7 +460,7 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
     }
 
     @Nullable
-    private MarkerPair findAlignedMarkerPair(Map<BlockPos, BlockState> structure, BlockPos baseConnection, BlockPos gatherStart) {
+    private MarkerPair findAlignedMarkerPair(Map<BlockPos, BlockState> structure, BlockPos baseConnection, BlockPos gatherStart, Direction.Axis blockedAxis) {
         BlockPos offsetVec = gatherStart.subtract(baseConnection);
         List<BlockPos> onMarkers = new ArrayList<>();
         List<BlockPos> offMarkers = new ArrayList<>();
@@ -482,6 +481,7 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
                 BlockPos originalOff = offPos.subtract(offsetVec);
                 Direction.Axis axis = commonLineAxis(baseConnection, originalOn, originalOff);
                 if (axis == null) continue;
+                if (axis == blockedAxis) continue;
 
                 double score = originalOn.distSqr(baseConnection) + originalOff.distSqr(baseConnection);
                 if (score < bestScore) {
@@ -704,15 +704,33 @@ public class SlideCoreBlockEntity extends BlockEntity implements IControlContrap
 
     // --- IControlContraption 实现 ---
 
+    public void disassembleForBlockRemoval() {
+        if (level != null && !level.isClientSide && movedContraption != null) {
+            ControlledContraptionEntity contraption = movedContraption;
+            movedContraption = null;
+            com.qiuxtao.create_ugocraft.CreateUgoCraft.suppressDispenserActivation = true;
+            try {
+                if (contraption.isAlive()) {
+                    contraption.disassemble();
+                    contraption.discard();
+                }
+            } finally {
+                com.qiuxtao.create_ugocraft.CreateUgoCraft.suppressDispenserActivation = false;
+            }
+        }
+
+        this.state = State.IDLE;
+        this.isShapeSaved = false;
+        this.currentProgress = 0;
+        this.currentDirection = 1.0;
+        this.targetDistance = 0;
+        this.slideAxis = null;
+        setChanged();
+    }
+
     @Override
     public void setRemoved() {
-        // 核心方块被破坏时，立即将运动中的结构解体回世界
-        if (level != null && !level.isClientSide && movedContraption != null && movedContraption.isAlive()) {
-            movedContraption.disassemble();
-            movedContraption.discard();
-            movedContraption = null;
-            this.state = State.IDLE;
-        }
+        movedContraption = null;
         super.setRemoved();
     }
 
